@@ -25,4 +25,4 @@ def ledblink(boardnum,delay=0.5,blinknummer=1):
         time.sleep(delay)
 
 while True:
-    ledblink({4,17,22,27},0)
+    ledblink({4,17,22,27})
