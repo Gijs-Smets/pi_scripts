@@ -2,7 +2,7 @@ import time
 import board
 import digitalio
 
-print("hello blinky!")
+print("Blinking")
 
 board = {4 : digitalio.DigitalInOut(board.D4),
          17 : digitalio.DigitalInOut(board.D17),
