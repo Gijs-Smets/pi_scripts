@@ -13,12 +13,12 @@ board = {4 : digitalio.DigitalInOut(board.D4),
 for i in board:
     board[i].direction = digitalio.Direction.OUTPUT
 
-def ledblink(boardnum):
+def ledblink(boardnum,delay=0.5):
     led = board[boardnum]
     led.value = True
-    time.sleep(0.5)
+    time.sleep(delay)
     led.value = False
-    time.sleep(0.5)
+    time.sleep(delay)
 
 while True:
     ledblink(4)
