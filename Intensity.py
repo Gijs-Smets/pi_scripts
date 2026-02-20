@@ -14,19 +14,19 @@ for i in board:
     board[i].direction = digitalio.Direction.OUTPUT
 
 def ledblink(boardnum,duty_cycle=100,blinknummer=100):
-    time_high = 0.02 * (duty_cycle / 100)
-    time_low = 0.02 - time_high
+    time_high = 0.01 * (duty_cycle / 100)
+    time_low = 0.01 - time_high
     for i in range(blinknummer):
         for j in boardnum:
             led = board[j]
-            led.value = time_high
-        time.sleep(delay)
+            led.value = True
+        time.sleep(time_high)
         for j in boardnum:
             led = board[j]
-            led.value = time_low      
-        time.sleep(delay)
+            led.value = False      
+        time.sleep(time_low)
 
 while True:
-    ledblink({4,17,22,27},75,3)
-    ledblink({4,17,22,27},25,3)
+    ledblink({4,17,22,27},90,10)
+    ledblink({4,17,22,27},10,10)
 
