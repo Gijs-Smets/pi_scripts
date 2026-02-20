@@ -29,4 +29,3 @@ def ledblink(boardnum,duty_cycle=100,blinknummer=100):
 while True:
     ledblink({4,17,22,27},90,10)
     ledblink({4,17,22,27},10,10)
-
