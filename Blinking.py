@@ -4,23 +4,26 @@ import digitalio
 
 print("hello blinky!")
 
-led = digitalio.DigitalInOut(board.D17)
-led.direction = digitalio.Direction.OUTPUT
-led2 = digitalio.DigitalInOut(board.D27)
-led2.direction = digitalio.Direction.OUTPUT
-led3 = digitalio.DigitalInOut(board.D22)
-led3.direction = digitalio.Direction.OUTPUT
+board = {4 : digitalio.DigitalInOut(board.D4),
+         17 : digitalio.DigitalInOut(board.D17),
+         22 : digitalio.DigitalInOut(board.D22),
+         27 : digitalio.DigitalInOut(board.D27)
+         }
 
-while True :
+for i in board:
+    board[i].direction = digitalio.Direction.OUTPUT
+
+def ledblink(boardnum):
+    led = board[boardnum]
     led.value = True
     time.sleep(0.5)
     led.value = False
     time.sleep(0.5)
-    led2.value = True
-    time.sleep(0.5)
-    led2.value = False
-    time.sleep(0.5)
-    led3.value = True
-    time.sleep(0.5)
-    led3.value = False
-    time.sleep(0.5)
+
+while True:
+    ledblink(4)
+    ledblink(17)
+    ledblink(27)
+    ledblink(22)
+    ledblink(27)
+    ledblink(17)
