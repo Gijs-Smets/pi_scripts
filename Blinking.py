@@ -8,8 +8,10 @@ led = digitalio.DigitalInOut(board.D17)
 led.direction = digitalio.Direction.OUTPUT
 led2 = digitalio.DigitalInOut(board.D27)
 led2.direction = digitalio.Direction.OUTPUT
+led3 = digitalio.DigitalInOut(board.D22)
+led3.direction = digitalio.Direction.OUTPUT
 
-while true :
+while True :
     led.value = True
     time.sleep(0.5)
     led.value = False
@@ -17,4 +19,8 @@ while true :
     led2.value = True
     time.sleep(0.5)
     led2.value = False
+    time.sleep(0.5)
+    led3.value = True
+    time.sleep(0.5)
+    led3.value = False
     time.sleep(0.5)
