@@ -22,9 +22,11 @@ pinIN.direction = digitalio.Direction.INPUT
 pinIN.pull = digitalio.Pull.UP
 
 while True:
-    while pinIN.value:   
+    while pinIN.value:
+        print("Blinking")   
         pinOUT.value = True
         time.sleep(0.3)
         pinOUT.value = False
         time.sleep(0.3)
     time.sleep(0.3)
+    print("Sleeping")
