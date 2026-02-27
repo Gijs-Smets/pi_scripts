@@ -7,12 +7,10 @@ pinIN = digitalio.DigitalInOut(board.D17)
 
 pinOUT.direction = digitalio.Direction.OUTPUT
 pinIN.direction = digitalio.Direction.INPUT
-pinIN.pull = digitalio.Pull.UP
+pinIN.pull = digitalio.Pull.DOWN
 
+pinOUT.value = True
 
-while True
-    if not pinIN.value:
-        pinOUT.value = True
-    else:
-        pinOUT.value = False
-    time.sleep(0.1)
+while True:
+    pinOUT.value = pinIN.value
+    time.sleep(0.5)
