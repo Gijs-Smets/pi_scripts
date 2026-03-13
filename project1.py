@@ -39,7 +39,7 @@ input1.pull = input2.pull = input3.pull = input4.pull = digitalio.Pull.UP
 
 
 led  = pwmio.PWMOut(board.D12, frequency=5000, duty_cycle=0)
-heat = digitalio.DigitalInOut(board.D20)
+heat = digitalio.DigitalInOut(board.D22)
 heat.direction = digitalio.Direction.OUTPUT
 
 lock = threading.Lock()

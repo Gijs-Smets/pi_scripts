@@ -32,13 +32,4 @@ def ledblink(boardnum,delay=0.5,blinknummer=1):
         time.sleep(delay)
 
 while True:
-    if switch.value:
-        ledblink({4})
-        ledblink({17})
-        ledblink({27})
-        ledblink({22})
-    else:
-        ledblink({22})
-        ledblink({27})
-        ledblink({17})
-        ledblink({4})
+    ledblink({22})
