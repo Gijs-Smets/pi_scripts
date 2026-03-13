@@ -5,33 +5,35 @@ channelID = 3289196;
 readAPIKey = '9QPOMCKVV5OIFAFL';
 
 [data, timestamps] = thingSpeakRead(channelID, ...
-    'Fields', [1, 2, 3], ...
-    'NumPoints', 60, ...
+    'Fields', [1, 2, 3, 4], ...
+    'NumPoints', 20, ...
     'ReadKey', readAPIKey);
 
-lux         = data(:, 1);
-temperature = data(:, 2);
-pressure    = data(:, 3);
+lux          = data(:, 1);
+temperature  = data(:, 2);
+target_light = data(:, 3);
+target_heat  = data(:, 4);
 
-% --- Light ---
-subplot(3, 1, 1);
-plot(timestamps, lux, 'y');
-title('Light Level');
+% --- Light vs Target Light ---
+subplot(2, 1, 1);
+plot(timestamps, lux, 'b', timestamps, target_light, 'b--');
+title('Light Level vs Target');
 ylabel('Lux');
+legend('Actual Lux', 'Target Lux');
 grid on;
+padding = 50;
+ylim([min([lux; target_light]) - padding, ...
+      max([lux; target_light]) + padding]);
 
-% --- Temperature ---
-subplot(3, 1, 2);
-plot(timestamps, temperature, 'r');
-title('Temperature');
+% --- Temperature vs Target Temperature ---
+subplot(2, 1, 2);
+plot(timestamps, temperature, 'r', timestamps, target_heat, 'r--');
+title('Temperature vs Target');
 ylabel('°C');
+legend('Actual Temp', 'Target Temp');
 grid on;
-
-% --- Pressure ---
-subplot(3, 1, 3);
-plot(timestamps, pressure, 'b');
-title('Barometric Pressure');
-ylabel('hPa');
-grid on;
+padding = 2;
+ylim([min([temperature; target_heat]) - padding, ...
+      max([temperature; target_heat]) + padding]);
 
 xlabel('Time');
