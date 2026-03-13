@@ -29,49 +29,73 @@ i2c = busio.I2C(board.SCL, board.SDA)
 light_sensor    = adafruit_bh1750.BH1750(i2c)
 pressure_sensor = adafruit_bmp280.Adafruit_BMP280_I2C(i2c, address=0x77)
 
+input1 = digitalio.DigitalInOut(board.D17)
+input2 = digitalio.DigitalInOut(board.D27)
+input3 = digitalio.DigitalInOut(board.D5)
+input4 = digitalio.DigitalInOut(board.D6)
+
+input1.direction = input2.direction = input3.direction = input4.direction = digitalio.Direction.INPUT
+input1.pull = input2.pull = input3.pull = input4.pull = digitalio.Pull.UP
+
+
+led = pwmio.PWMOut(board.D12,frequency=5000,duty_cycle=0)
+
+lock = threading.Lock()
 lux         = round(light_sensor.lux, 2)
 temperature = round(pressure_sensor.temperature, 1)
 pressure    = round(pressure_sensor.pressure, 2)
 
-led = pwmio.PWMOut(board.D12,frequency=5000,duty_cycle=0)
+with lock:
+    sensor_data = {
+        "lux" : lux,
+        "temperature" : temperature,
+        "pressure" : pressure,
+    }
 
+def publish():
+    while not exit_event.is_set():
+        with lock:
+            lux         = sensor_data["lux"]
+            temperature = sensor_data["temperature"]
+            pressure    = sensor_data["pressure"]
 
-def publish(lux,temperature,pressure):
-    while True:
-        #ThingSpeak DATA
         payload = f"field1={lux}&field2={temperature}&field3={pressure}"
-        result = client.publish(MQTT_TOPIC, payload)
+        client.publish(MQTT_TOPIC, payload)
         print(f"Published → Light: {lux} lux | Temp: {temperature}°C | Pressure: {pressure} hPa")
-        
-        time.sleep(15)
-        if exit_event.is_set():
-            break
 
-t1 = threading.Thread(target=publish,args=(lux,temperature,pressure))
+        exit_event.wait(timeout=15)         
+
+t1 = threading.Thread(target=publish)
 
 t1.start()
 
 try:
     while True:
+        target_light = 500
+
         lux         = round(light_sensor.lux, 2)
         temperature = round(pressure_sensor.temperature, 1)
         pressure    = round(pressure_sensor.pressure, 2)
 
+        with lock:
+            sensor_data = {
+                "lux" : lux,
+                "temperature" : temperature,
+                "pressure" : pressure,
+            }
+
         print(f"Light: {lux} lux | Temp: {temperature}°C | Pressure: {pressure} hPa")
 
-        pwm = ((550 - lux)/550)*65525
-        if pwm < 0:
-            pwm = 0
-        led.duty_cycle = pwm
-
-        # # Build ThingSpeak DATA
-        # payload = f"field1={lux}&field2={temperature}&field3={pressure}"
-
-        # result = client.publish(MQTT_TOPIC, payload)
-
-        # print(f"Published → Light: {lux} lux | Temp: {temperature}°C | Pressure: {pressure} hPa")
+        pwm = int(((target_light - lux) / target_light) * 65525)
+        led.duty_cycle = max(0, pwm)
 
         time.sleep(1)
 
-except KeyboardInterrupt:
-    exit_event.set()
+finally:
+    exit_event.set()        # signal thread to stop
+    t1.join()               # wait for thread to finish
+    led.duty_cycle = 0      # turn off LED
+    led.deinit()            # release PWM pin
+    client.loop_stop()      # stop MQTT background thread
+    client.disconnect()
+    print("Cleaned up, exiting.")
