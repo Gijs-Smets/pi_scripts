@@ -39,7 +39,8 @@ input1.pull = input2.pull = input3.pull = input4.pull = digitalio.Pull.UP
 
 
 led  = pwmio.PWMOut(board.D12, frequency=5000, duty_cycle=0)
-heat = pwmio.PWMOut(board.D13, frequency=5000, duty_cycle=0)
+heat = digitalio.DigitalInOut(board.D20)
+heat.direction = digitalio.Direction.OUTPUT
 
 lock = threading.Lock()
 lux         = round(light_sensor.lux, 2)
@@ -80,9 +81,9 @@ try:
         if not input2.value:
             target_light -= 10
         if not input3.value:
-            target_heat += 0.1
+            target_heat += 0.5
         if not input4.value:
-            target_heat -= 0.1
+            target_heat -= 0.5
 
         target_light = max(1, target_light)
         target_heat  = max(1, target_heat)
@@ -101,7 +102,8 @@ try:
         print(f"Light: {lux} lux | Temp: {temperature}°C")
 
         led.duty_cycle  = int(max(0, min(65535, ((target_light - lux) / target_light) * 65535)))
-        heat.duty_cycle = int(max(0, min(65535, ((target_heat  - temperature) / target_heat) * 65535)))
+        
+        heat.value = temperature < target_heat
 
         time.sleep(1)
 
@@ -109,8 +111,8 @@ finally:
     exit_event.set()
     t1.join()
     led.duty_cycle = 0
+    heat.value = False
     led.deinit()
-    heat.duty_cycle = 0
     heat.deinit()
     client.loop_stop()
     client.disconnect()
