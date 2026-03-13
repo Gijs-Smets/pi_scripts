@@ -28,18 +28,18 @@ i2c = busio.I2C(board.SCL, board.SDA)
 light_sensor    = adafruit_bh1750.BH1750(i2c)
 pressure_sensor = adafruit_bmp280.Adafruit_BMP280_I2C(i2c, address=0x77)
 
-D4 = digitalio.DigitalInOut(board.D4)
-D4.direction = digitalio.Direction.OUTPUT
+led = pwmio.PWMOut(board.D12,frequency=5000,duty_cycle=0)
 
 while True:
     lux         = round(light_sensor.lux, 2)
     temperature = round(pressure_sensor.temperature, 1)
     pressure    = round(pressure_sensor.pressure, 2)
 
-    if lux > 300:
-        D4.value = False
-    else:
-        D4.value = True
+    pwm = ((550 - lux)/550)*65525
+    if pwm < 0:
+        pwm = 0
+    print(pwm)
+    led.duty_cycle = pwm
 
     # Build ThingSpeak DATA
     payload = f"field1={lux}&field2={temperature}&field3={pressure}"

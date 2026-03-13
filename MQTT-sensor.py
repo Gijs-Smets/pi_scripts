@@ -30,21 +30,25 @@ pressure_sensor = adafruit_bmp280.Adafruit_BMP280_I2C(i2c, address=0x77)
 D4 = digitalio.DigitalInOut(board.D4)
 D4.direction = digitalio.Direction.OUTPUT
 
-while True:
-    lux         = round(light_sensor.lux, 2)
-    temperature = round(pressure_sensor.temperature, 1)
-    pressure    = round(pressure_sensor.pressure, 2)
+try:
+    while True:
+        lux         = round(light_sensor.lux, 2)
+        temperature = round(pressure_sensor.temperature, 1)
+        pressure    = round(pressure_sensor.pressure, 2)
 
-    if lux > 300:
-        D4.value = False
-    else:
-        D4.value = True
+        if lux > 300:
+            D4.value = False
+        else:
+            D4.value = True
 
-    # Build ThingSpeak DATA
-    payload = f"field1={lux}&field2={temperature}&field3={pressure}"
+        # Build ThingSpeak DATA
+        payload = f"field1={lux}&field2={temperature}&field3={pressure}"
 
-    result = client.publish(MQTT_TOPIC, payload)
+        result = client.publish(MQTT_TOPIC, payload)
 
-    print(f"Published → Light: {lux} lux | Temp: {temperature}°C | Pressure: {pressure} hPa")
+        print(f"Published → Light: {lux} lux | Temp: {temperature}°C | Pressure: {pressure} hPa")
 
-    time.sleep(PUBLISH_INTERVAL)
+        time.sleep(PUBLISH_INTERVAL)
+
+finally:
+    led_pwm.deinit()
