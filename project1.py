@@ -44,15 +44,13 @@ heat = pwmio.PWMOut(board.D13, frequency=5000, duty_cycle=0)
 lock = threading.Lock()
 lux         = round(light_sensor.lux, 2)
 temperature = round(pressure_sensor.temperature, 1)
-pressure    = round(pressure_sensor.pressure, 2)
 target_light = 500
-target_heat = 0
+target_heat = 22
 
 with lock:
     sensor_data = {
         "lux"          : lux,
         "temperature"  : temperature,
-        "pressure"     : pressure,
         "target_light" : target_light,
         "target_heat"  : target_heat,
     }
@@ -62,13 +60,12 @@ def publish():
         with lock:
             lux         = sensor_data["lux"]
             temperature = sensor_data["temperature"]
-            pressure    = sensor_data["pressure"]
             target_light = sensor_data["target_light"]
             target_heat  = sensor_data["target_heat"]
 
-        payload = f"field1={lux}&field2={temperature}&field3={pressure}&field4={target_light}&field5={target_heat}"
+        payload = f"field1={lux}&field2={temperature}&field3={target_light}&field4={target_heat}"
         client.publish(MQTT_TOPIC, payload)
-        print(f"Published → Light: {lux} lux | Temp: {temperature}°C | Pressure: {pressure} hPa | Target light: {target_light} | Target heat: {target_heat}")
+        print(f"Published → Light: {lux} lux | Temp: {temperature}°C | Target light: {target_light} | Target heat: {target_heat}")
 
         exit_event.wait(timeout=15)
 
@@ -88,25 +85,23 @@ try:
             target_heat -= 0.1
 
         target_light = max(1, target_light)
-        target_heat  = max(0.0, min(1.0, target_heat))
+        target_heat  = max(1, target_heat)
 
         lux         = round(light_sensor.lux, 2)
         temperature = round(pressure_sensor.temperature, 1)
-        pressure    = round(pressure_sensor.pressure, 2)
 
         with lock:
             sensor_data = {
                 "lux" : lux,
                 "temperature" : temperature,
-                "pressure" : pressure,
                 "target_light" : target_light,
                 "target_heat"  : target_heat,
             }
 
-        print(f"Light: {lux} lux | Temp: {temperature}°C | Pressure: {pressure} hPa")
+        print(f"Light: {lux} lux | Temp: {temperature}°C")
 
-        led.duty_cycle = int(max(0,((target_light - lux) / target_light) * 65525))
-        heat.duty_cycle = int(min(65535, 65535 * target_heat))
+        led.duty_cycle  = int(max(0, min(65535, ((target_light - lux) / target_light) * 65535)))
+        heat.duty_cycle = int(max(0, min(65535, ((target_heat  - temperature) / target_heat) * 65535)))
 
         time.sleep(1)
 
