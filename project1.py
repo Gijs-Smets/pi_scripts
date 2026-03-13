@@ -2,6 +2,7 @@ import time
 import board
 import busio
 import digitalio
+import pwmio
 import adafruit_bh1750
 import adafruit_bmp280
 import paho.mqtt.client as mqtt
