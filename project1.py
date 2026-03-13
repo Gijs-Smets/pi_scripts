@@ -38,7 +38,10 @@ input1.direction = input2.direction = input3.direction = input4.direction = digi
 input1.pull = input2.pull = input3.pull = input4.pull = digitalio.Pull.UP
 
 
-led = pwmio.PWMOut(board.D12,frequency=5000,duty_cycle=0)
+led  = pwmio.PWMOut(board.D12, frequency=5000, duty_cycle=0)
+heat = pwmio.PWMOut(board.D13, frequency=5000, duty_cycle=0)
+target_light = 0
+target_heat = 500
 
 lock = threading.Lock()
 lux         = round(light_sensor.lux, 2)
@@ -71,7 +74,14 @@ t1.start()
 
 try:
     while True:
-        target_light = 500
+        if not input1.value:
+            target_light += 10
+        if not input2.value:
+            target_light -= 10
+        if not input3.value:
+            target_heat += 0.1
+        if not input4.value:
+            target_heat -= 0.1
 
         lux         = round(light_sensor.lux, 2)
         temperature = round(pressure_sensor.temperature, 1)
@@ -86,16 +96,23 @@ try:
 
         print(f"Light: {lux} lux | Temp: {temperature}°C | Pressure: {pressure} hPa")
 
-        pwm = int(((target_light - lux) / target_light) * 65525)
-        led.duty_cycle = max(0, pwm)
+        if target_light > 0:
+            pwm = int(((target_light - lux) / target_light) * 65525)
+            led.duty_cycle = max(0, min(65535, pwm))
+        else:
+            led.duty_cycle = 0
+
+        heat.duty_cycle = int(min(65535, 65535 * target_heat))
 
         time.sleep(1)
 
 finally:
-    exit_event.set()        # signal thread to stop
-    t1.join()               # wait for thread to finish
-    led.duty_cycle = 0      # turn off LED
-    led.deinit()            # release PWM pin
-    client.loop_stop()      # stop MQTT background thread
+    exit_event.set()
+    t1.join()
+    led.duty_cycle = 0
+    led.deinit()
+    heat.duty_cycle = 0
+    heat.deinit()
+    client.loop_stop()
     client.disconnect()
     print("Cleaned up, exiting.")
