@@ -78,9 +78,9 @@ t1.start()
 try:
     while True:
         if not input1.value:
-            target_light += 10
+            target_light += 20
         if not input2.value:
-            target_light -= 10
+            target_light -= 20
         if not input3.value:
             target_heat += 0.5
         if not input4.value:
@@ -102,9 +102,9 @@ try:
         print(f"Light: {lux} lux | Temp: {temperature}°C")
 
         if duty_cycle != 0:
-            if lux > target_light + 10:
+            if lux > target_light + 20:
                 duty_cycle -= 0.1
-            elif lux < target_light:
+            elif lux < target_light - 20:
                 duty_cycle += 0.1
         elif lux < target_light:
             duty_cycle = 0.5
@@ -123,7 +123,7 @@ finally:
     exit_event.set()
     t1.join()
     led.duty_cycle = 0
-    heat.value = False
+    heat.value = True
     led.deinit()
     heat.deinit()
     client.loop_stop()
