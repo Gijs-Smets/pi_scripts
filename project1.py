@@ -43,10 +43,11 @@ heat = digitalio.DigitalInOut(board.D22)
 heat.direction = digitalio.Direction.OUTPUT
 
 lock = threading.Lock()
-lux         = round(light_sensor.lux, 2)
-temperature = round(pressure_sensor.temperature, 1)
+lux          = round(light_sensor.lux, 2)
+temperature  = round(pressure_sensor.temperature, 1)
 target_light = 500
-target_heat = 22
+target_heat  = 22
+duty_cycle   = 0
 
 with lock:
     sensor_data = {
@@ -59,8 +60,8 @@ with lock:
 def publish():
     while not exit_event.is_set():
         with lock:
-            lux         = sensor_data["lux"]
-            temperature = sensor_data["temperature"]
+            lux          = sensor_data["lux"]
+            temperature  = sensor_data["temperature"]
             target_light = sensor_data["target_light"]
             target_heat  = sensor_data["target_heat"]
 
@@ -85,8 +86,7 @@ try:
         if not input4.value:
             target_heat -= 0.5
 
-        target_light = max(1, target_light)
-        target_heat  = max(1, target_heat)
+        target_light = max(0, target_light)
 
         lux         = round(light_sensor.lux, 2)
         temperature = round(pressure_sensor.temperature, 1)
@@ -101,9 +101,21 @@ try:
 
         print(f"Light: {lux} lux | Temp: {temperature}°C")
 
-        led.duty_cycle  = int(max(0, min(65535, ((target_light - lux) / target_light) * 65535)))
-        
-        heat.value = temperature < target_heat
+        if duty_cycle != 0:
+            if lux > target_light + 10:
+                duty_cycle -= 0.1
+            elif lux < target_light:
+                duty_cycle += 0.1
+        elif lux < target_light:
+            duty_cycle = 0.5
+        duty_cycle = min(1, max(0, duty_cycle))
+
+        led.duty_cycle  = int(duty_cycle * 65535)
+    
+        if temperature < target_heat - 0.5:
+            heat.value = False
+        elif temperature > target_heat + 0.5:
+            heat.value = True
 
         time.sleep(1)
 
