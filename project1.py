@@ -99,7 +99,7 @@ try:
                 "target_heat"  : target_heat,
             }
 
-        print(f"Light: {lux} lux | Temp: {temperature}°C")
+        print(f"Light: {lux} lux | Temp: {temperature}°C | Target Light: {target_light}°C | Target Temp: {target_heat}°C")
 
         if duty_cycle != 0:
             if lux > target_light + 20:
