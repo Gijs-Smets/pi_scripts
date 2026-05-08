@@ -99,11 +99,9 @@ while True:
         device.readinto(bytes_read)
     lux = (((bytes_read[0]&3)<<8) + bytes_read[1])/1.2 # conversion see datasheet
     print("%.2f Lux (no lib)" % lux)
-    # Print: for debugging, uncomment the following line
-    print("Test data : 420 lux")
     # Create the JSON data structure
     # MQTT_DATA = "field1="+str(bmp280.temperature)+"&field2="+str(bmp280.pressure)+"&status=MQTTPUBLISH"
-    MQTT_DATA = "field1=420&status=MQTTPUBLISH"
+    MQTT_DATA = "field1="+str(lux)+"&status=MQTTPUBLISH"
     print(MQTT_DATA)
     try:
         mqtt_client.publish(MQTT_TOPIC, MQTT_DATA)
